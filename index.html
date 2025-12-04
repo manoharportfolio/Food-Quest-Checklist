@@ -5,7 +5,15 @@
   <title>Food Quest Checklist</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0f172a" />
+
+  <!-- ✅ PWA Manifest & Icons -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
   <style>
+    /* same styling as before, shortened comment to save space */
     :root {
       --bg: #020617;
       --bg-elevated: #0b1220;
@@ -15,412 +23,150 @@
       --text: #e5e7eb;
       --muted: #9ca3af;
       --border: #1f2937;
-      --danger: #f97373;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Inter",sans-serif;
+      background:radial-gradient(circle at top,#111827 0,#020617 45%);
+      color:var(--text);
+      display:flex;
+      justify-content:center;
+      padding:1rem;
+    }
+    .app{
+      width:100%;
+      max-width:720px;
+      background:linear-gradient(145deg,rgba(15,23,42,0.98),rgba(15,23,42,0.98));
+      border-radius:1.25rem;
+      border:1px solid rgba(148,163,184,0.18);
+      box-shadow:0 18px 45px rgba(15,23,42,0.7),0 0 0 1px rgba(15,23,42,0.9);
+      padding:1.25rem;
+      backdrop-filter:blur(12px);
+    }
+    header{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;}
+    .logo{
+      width:42px;height:42px;border-radius:50%;
+      background:radial-gradient(circle at 25% 0%,#22c55e,#16a34a 40%,#0f172a 100%);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:800;color:#e5f8ed;font-size:1.2rem;
+      box-shadow:0 0 0 3px rgba(34,197,94,0.25),0 12px 24px rgba(34,197,94,0.45);
+    }
+    .title-block{flex:1;}
+    h1{font-size:1.15rem;margin:0;letter-spacing:.03em;text-transform:uppercase;color:#f9fafb;}
+    .subtitle{font-size:.78rem;color:var(--muted);margin-top:.15rem;}
+    .header-actions{display:flex;flex-direction:column;gap:.35rem;align-items:flex-end;}
+    button{
+      border:none;border-radius:999px;padding:.4rem .9rem;font-size:.78rem;font-weight:500;
+      cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;
+      transition:all .15s ease;background:rgba(15,23,42,.8);color:var(--muted);
+      border:1px solid rgba(148,163,184,.3);
+    }
+    button:hover{background:rgba(15,23,42,1);color:#e5e7eb;border-color:rgba(148,163,184,.7);}
+    .btn-accent{
+      background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+      color:#ecfdf3;border:none;
+      box-shadow:0 10px 25px rgba(22,163,74,.5),0 0 0 1px rgba(34,197,94,.6);
+    }
+    .btn-accent:hover{filter:brightness(1.05);transform:translateY(-1px);}
+    .btn-small{padding-inline:.7rem;font-size:.74rem;}
+
+    .tabs{
+      display:flex;gap:.4rem;margin-bottom:.9rem;
+      background:rgba(15,23,42,.9);padding:.25rem;border-radius:999px;
+      border:1px solid rgba(31,41,55,.9);
+    }
+    .tab{
+      flex:1;text-align:center;padding:.45rem .3rem;font-size:.8rem;border-radius:999px;
+      cursor:pointer;color:var(--muted);border:none;background:transparent;
+      transition:all .16s ease;display:flex;align-items:center;justify-content:center;gap:.25rem;
+    }
+    .tab span.icon{font-size:.9rem;}
+    .tab.active{
+      background:radial-gradient(circle at 0 0,rgba(34,197,94,.45),rgba(15,23,42,.95));
+      color:#f9fafb;font-weight:600;
+      box-shadow:0 0 0 1px rgba(34,197,94,.7),0 10px 22px rgba(15,23,42,.9);
     }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
+    .summary-bar{
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:.78rem;color:var(--muted);margin-bottom:.65rem;gap:.5rem;flex-wrap:wrap;
+    }
+    .summary-bar strong{color:#e5e7eb;}
+    .chip{
+      padding:.22rem .6rem;border-radius:999px;background:rgba(15,23,42,.9);
+      border:1px solid rgba(55,65,81,.9);display:inline-flex;align-items:center;gap:.3rem;
+    }
+    .chip-good{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.7);color:#bbf7d0;}
+    .chip span.icon{font-size:.9rem;}
+
+    .progress-track{
+      width:100%;height:6px;border-radius:999px;
+      background:radial-gradient(circle at 0 0,#0f172a,#020617);
+      overflow:hidden;border:1px solid rgba(31,41,55,.9);margin-bottom:.4rem;
+    }
+    .progress-bar{
+      height:100%;width:0%;
+      background:linear-gradient(90deg,var(--accent),var(--accent-strong));
+      transition:width .25s ease-out;
     }
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
-      background: radial-gradient(circle at top, #111827 0, #020617 45%);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      padding: 1rem;
+    .list-container{
+      border-radius:1rem;border:1px solid rgba(31,41,55,.9);
+      background:radial-gradient(circle at top left,rgba(15,23,42,.9),rgba(2,6,23,.95));
+      padding:.4rem .3rem .2rem;max-height:min(560px,65vh);overflow:auto;
+      scrollbar-width:thin;scrollbar-color:#4b5563 #020617;
+    }
+    .list-container::-webkit-scrollbar{width:6px;}
+    .list-container::-webkit-scrollbar-track{background:#020617;}
+    .list-container::-webkit-scrollbar-thumb{background:#4b5563;border-radius:999px;}
+
+    .group-label{
+      font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;color:#9ca3af;
+      margin:.4rem .65rem .25rem;display:flex;align-items:center;gap:.25rem;
+    }
+    .group-label::before{
+      content:"";width:6px;height:6px;border-radius:999px;background:rgba(148,163,184,.7);
     }
 
-    .app {
-      width: 100%;
-      max-width: 720px;
-      background: linear-gradient(145deg, rgba(15,23,42,0.98), rgba(15,23,42,0.98));
-      border-radius: 1.25rem;
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      box-shadow:
-        0 18px 45px rgba(15, 23, 42, 0.7),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      padding: 1.25rem;
-      backdrop-filter: blur(12px);
+    .todo-item{
+      padding:.35rem .6rem;display:flex;align-items:center;gap:.6rem;
+      border-radius:.8rem;cursor:pointer;transition:background .16s ease,transform .06s ease;
     }
+    .todo-item:hover{background:rgba(15,23,42,.9);transform:translateY(-1px);}
+    .todo-label{display:flex;align-items:center;gap:.5rem;flex:1;}
+    .todo-main{font-size:.88rem;color:#e5e7eb;}
+    .todo-meta{font-size:.72rem;color:#9ca3af;}
+    .todo-right{font-size:.7rem;color:#6b7280;}
 
-    header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
+    input[type="checkbox"]{display:none;}
+    .check-wrap{
+      width:22px;height:22px;border-radius:999px;
+      border:1px solid rgba(75,85,99,.9);display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;background:radial-gradient(circle at 30% 0,#1f2937,#020617);
+      transition:all .16s ease;
     }
-
-    .logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 25% 0%, #22c55e, #16a34a 40%, #0f172a 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: #e5f8ed;
-      font-size: 1.2rem;
-      box-shadow:
-        0 0 0 3px rgba(34, 197, 94, 0.25),
-        0 12px 24px rgba(34, 197, 94, 0.45);
+    .check-wrap span{opacity:0;transform:scale(.4);transition:all .16s ease;font-size:.9rem;color:#bbf7d0;}
+    .todo-item.completed .check-wrap{
+      background:radial-gradient(circle at 30% 0,#22c55e,#16a34a);border-color:rgba(22,163,74,.9);
+      box-shadow:0 0 0 1px rgba(34,197,94,.7),0 8px 14px rgba(22,163,74,.45);
     }
+    .todo-item.completed .check-wrap span{opacity:1;transform:scale(1);}
+    .todo-item.completed .todo-main{text-decoration:line-through;text-decoration-color:rgba(248,250,252,.6);color:#9ca3af;}
+    .todo-item.completed .todo-meta{color:#6b7280;}
+    .todo-item.completed .todo-right{color:#4ade80;}
 
-    .title-block {
-      flex: 1;
+    .empty-note{font-size:.8rem;color:#6b7280;padding:.7rem .7rem .9rem;}
+    .footer-note{
+      margin-top:.7rem;font-size:.72rem;color:#6b7280;
+      display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;align-items:center;
     }
-
-    h1 {
-      font-size: 1.15rem;
-      margin: 0;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      color: #f9fafb;
-    }
-
-    .subtitle {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-top: 0.15rem;
-    }
-
-    .header-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      align-items: flex-end;
-    }
-
-    button {
-      border: none;
-      border-radius: 999px;
-      padding: 0.4rem 0.9rem;
-      font-size: 0.78rem;
-      font-weight: 500;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      transition: all 0.15s ease;
-      background: rgba(15,23,42,0.8);
-      color: var(--muted);
-      border: 1px solid rgba(148,163,184,0.3);
-    }
-
-    button:hover {
-      background: rgba(15,23,42,1);
-      color: #e5e7eb;
-      border-color: rgba(148,163,184,0.7);
-    }
-
-    .btn-accent {
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      color: #ecfdf3;
-      border: none;
-      box-shadow:
-        0 10px 25px rgba(22, 163, 74, 0.5),
-        0 0 0 1px rgba(34, 197, 94, 0.6);
-    }
-
-    .btn-accent:hover {
-      filter: brightness(1.05);
-      transform: translateY(-1px);
-    }
-
-    .btn-small {
-      padding-inline: 0.7rem;
-      font-size: 0.74rem;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 0.4rem;
-      margin-bottom: 0.9rem;
-      background: rgba(15, 23, 42, 0.9);
-      padding: 0.25rem;
-      border-radius: 999px;
-      border: 1px solid rgba(31, 41, 55, 0.9);
-    }
-
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 0.45rem 0.3rem;
-      font-size: 0.8rem;
-      border-radius: 999px;
-      cursor: pointer;
-      color: var(--muted);
-      border: none;
-      background: transparent;
-      transition: all 0.16s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.25rem;
-    }
-
-    .tab span.icon {
-      font-size: 0.9rem;
-    }
-
-    .tab.active {
-      background: radial-gradient(circle at 0 0, rgba(34,197,94,0.45), rgba(15,23,42,0.95));
-      color: #f9fafb;
-      font-weight: 600;
-      box-shadow:
-        0 0 0 1px rgba(34,197,94,0.7),
-        0 10px 22px rgba(15,23,42,0.9);
-    }
-
-    .summary-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-bottom: 0.65rem;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .summary-bar strong {
-      color: #e5e7eb;
-    }
-
-    .chip {
-      padding: 0.22rem 0.6rem;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .chip-good {
-      background: var(--accent-soft);
-      border-color: rgba(34,197,94,0.7);
-      color: #bbf7d0;
-    }
-
-    .chip span.icon {
-      font-size: 0.9rem;
-    }
-
-    .progress-track {
-      width: 100%;
-      height: 6px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 0 0, #0f172a, #020617);
-      overflow: hidden;
-      border: 1px solid rgba(31,41,55,0.9);
-      margin-bottom: 0.4rem;
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
-      transition: width 0.25s ease-out;
-    }
-
-    .list-container {
-      border-radius: 1rem;
-      border: 1px solid rgba(31,41,55,0.9);
-      background: radial-gradient(circle at top left, rgba(15,23,42,0.9), rgba(2,6,23,0.95));
-      padding: 0.4rem 0.3rem 0.2rem;
-      max-height: min(560px, 65vh);
-      overflow: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #4b5563 #020617;
-    }
-
-    .list-container::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .list-container::-webkit-scrollbar-track {
-      background: #020617;
-    }
-
-    .list-container::-webkit-scrollbar-thumb {
-      background: #4b5563;
-      border-radius: 999px;
-    }
-
-    .group-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      color: #9ca3af;
-      margin: 0.4rem 0.65rem 0.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-    .group-label::before {
-      content: "";
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(148,163,184,0.7);
-    }
-
-    .todo-item {
-      padding: 0.35rem 0.6rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      border-radius: 0.8rem;
-      cursor: pointer;
-      transition: background 0.16s ease, transform 0.06s ease;
-    }
-
-    .todo-item:hover {
-      background: rgba(15, 23, 42, 0.9);
-      transform: translateY(-1px);
-    }
-
-    .todo-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex: 1;
-    }
-
-    .todo-main {
-      font-size: 0.88rem;
-      color: #e5e7eb;
-    }
-
-    .todo-meta {
-      font-size: 0.72rem;
-      color: #9ca3af;
-    }
-
-    .todo-right {
-      font-size: 0.7rem;
-      color: #6b7280;
-    }
-
-    input[type="checkbox"] {
-      display: none;
-    }
-
-    .check-wrap {
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      border: 1px solid rgba(75,85,99,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      background: radial-gradient(circle at 30% 0, #1f2937, #020617);
-      transition: all 0.16s ease;
-    }
-
-    .check-wrap span {
-      opacity: 0;
-      transform: scale(0.4);
-      transition: all 0.16s ease;
-      font-size: 0.9rem;
-      color: #bbf7d0;
-    }
-
-    .todo-item.completed .check-wrap {
-      background: radial-gradient(circle at 30% 0, #22c55e, #16a34a);
-      border-color: rgba(22,163,74,0.9);
-      box-shadow:
-        0 0 0 1px rgba(34, 197, 94, 0.7),
-        0 8px 14px rgba(22, 163, 74, 0.45);
-    }
-
-    .todo-item.completed .check-wrap span {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .todo-item.completed .todo-main {
-      text-decoration: line-through;
-      text-decoration-color: rgba(248, 250, 252, 0.6);
-      color: #9ca3af;
-    }
-
-    .todo-item.completed .todo-meta {
-      color: #6b7280;
-    }
-
-    .todo-item.completed .todo-right {
-      color: #4ade80;
-    }
-
-    .empty-note {
-      font-size: 0.8rem;
-      color: #6b7280;
-      padding: 0.7rem 0.7rem 0.9rem;
-    }
-
-    .footer-note {
-      margin-top: 0.7rem;
-      font-size: 0.72rem;
-      color: #6b7280;
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .footer-note a {
-      color: #a5b4fc;
-      text-decoration: none;
-    }
-
-    .footer-note a:hover {
-      text-decoration: underline;
-    }
-
-    .linkish {
-      color: #a5b4fc;
-      cursor: pointer;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 0.6rem;
-      }
-
-      .app {
-        padding: 0.9rem;
-        border-radius: 1rem;
-      }
-
-      header {
-        align-items: flex-start;
-      }
-
-      .header-actions {
-        align-items: flex-end;
-      }
-
-      h1 {
-        font-size: 1rem;
-      }
-
-      .tabs {
-        font-size: 0.76rem;
-      }
-
-      .list-container {
-        max-height: 60vh;
-      }
+    .linkish{color:#a5b4fc;cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+    @media(max-width:600px){
+      body{padding:.6rem;}
+      .app{padding:.9rem;border-radius:1rem;}
+      h1{font-size:1rem;}
+      .list-container{max-height:60vh;}
     }
   </style>
 </head>
@@ -471,121 +217,85 @@
       <div class="progress-bar" id="progressBar"></div>
     </div>
 
-    <div class="list-container" id="listContainer">
-      <!-- Items will be injected here -->
-    </div>
+    <div class="list-container" id="listContainer"></div>
 
     <div class="footer-note">
-      <span>
-        Data is saved locally in your browser (no account, no server).
-      </span>
+      <span>Data is saved locally in your browser (no account, no server).</span>
       <span class="linkish" id="selectAllDone">Mark all in this tab as done</span>
     </div>
   </div>
 
   <script>
-    // ---------- DATA ----------
     const DATA = {
       fullChecklist: {
         label: "Full Checklist",
         hint: "Try everything once before repeating your favourites.",
         groups: [
-          {
-            name: "McDonald's",
-            items: [
-              { id: "mcd-mcspicy-paneer", name: "McSpicy Paneer", meta: "McDonald's" },
-              { id: "mcd-chicken-maharaja", name: "Chicken Maharaja Mac", meta: "McDonald's" },
-              { id: "mcd-mexican-mcaloo", name: "Mexican McAloo Tikki", meta: "McDonald's" },
-              { id: "mcd-fries-piri", name: "Fries + Piri Piri Mix", meta: "Classic combo" },
-              { id: "mcd-mcflurry-oreo", name: "McFlurry Oreo", meta: "Dessert" }
-            ]
-          },
-          {
-            name: "KFC",
-            items: [
-              { id: "kfc-hot-crispy", name: "Hot & Crispy Chicken", meta: "Signature" },
-              { id: "kfc-zinger-burger", name: "Zinger Burger", meta: "Classic" },
-              { id: "kfc-popcorn-chicken", name: "Popcorn Chicken (Large)", meta: "Snack" },
-              { id: "kfc-rice-bowl", name: "Rice Bowl", meta: "Meal" },
-              { id: "kfc-krusher", name: "Krusher (if available)", meta: "Drink" }
-            ]
-          },
-          {
-            name: "KS Bakers",
-            items: [
-              { id: "ksb-chicken-puff", name: "Chicken Puff", meta: "Bakery" },
-              { id: "ksb-chicken65-burger", name: "Chicken 65 Burger", meta: "Burger" },
-              { id: "ksb-fresh-cream-pastry", name: "Fresh Cream Pastry", meta: "Dessert" },
-              { id: "ksb-dutch-truffle", name: "Dutch Truffle Pastry", meta: "Dessert" },
-              { id: "ksb-chicken-roll", name: "Chicken Roll", meta: "Snack" }
-            ]
-          },
-          {
-            name: "Pizza Hut",
-            items: [
-              { id: "ph-tandoori-paneer", name: "Tandoori Paneer Pizza", meta: "Pizza Hut" },
-              { id: "ph-garlic-bread", name: "Garlic Bread Stix", meta: "Side" },
-              { id: "ph-stuffed-crust", name: "Stuffed Crust Pizza", meta: "Cheese overload" }
-            ]
-          },
-          {
-            name: "Domino's",
-            items: [
-              { id: "dom-chicken-dominator", name: "Chicken Dominator", meta: "Domino's" },
-              { id: "dom-peppy-paneer", name: "Peppy Paneer", meta: "Domino's" },
-              { id: "dom-zingy-parcel", name: "Zingy Parcel", meta: "Snack" },
-              { id: "dom-garlic-bread", name: "Garlic Bread", meta: "Side" },
-              { id: "dom-choco-lava", name: "Choco Lava Cake", meta: "Dessert" }
-            ]
-          },
-          {
-            name: "Chutneys",
-            items: [
-              { id: "ch-mla-pesarattu", name: "MLA Pesarattu", meta: "Chutneys" },
-              { id: "ch-guntur-idli", name: "Guntur Idli", meta: "Spicy" },
-              { id: "ch-rava-dosa", name: "Rava Dosa", meta: "Crispy" },
-              { id: "ch-vada-chutneys", name: "Vada + All Chutneys", meta: "Combo" }
-            ]
-          },
-          {
-            name: "Paradise Biryani",
-            items: [
-              { id: "par-chicken-biryani", name: "Chicken Biryani", meta: "Paradise" },
-              { id: "par-paneer-biryani", name: "Paneer Biryani", meta: "Paradise" },
-              { id: "par-chicken65", name: "Chicken 65", meta: "Starter" },
-              { id: "par-irani-chai", name: "Irani Chai + Osmania", meta: "Tea break" }
-            ]
-          },
-          {
-            name: "Karachi Bakery",
-            items: [
-              { id: "kar-fruit-biscuits", name: "Fruit Biscuits", meta: "Karachi Bakery" },
-              { id: "kar-osmania-biscuits", name: "Osmania Biscuits", meta: "Hyderabad staple" },
-              { id: "kar-plum-cake", name: "Plum Cake", meta: "Bakery" },
-              { id: "kar-choc-cashew", name: "Chocolate Cashew Biscuits", meta: "Snack" }
-            ]
-          },
-          {
-            name: "Starbucks",
-            items: [
-              { id: "sb-java-chip", name: "Java Chip Frappuccino", meta: "Starbucks" },
-              { id: "sb-caramel-macchiato", name: "Caramel Macchiato", meta: "Hot / Iced" },
-              { id: "sb-cold-brew", name: "Cold Brew", meta: "Strong" },
-              { id: "sb-hot-chocolate", name: "Classic Hot Chocolate", meta: "Comfort" }
-            ]
-          },
-          {
-            name: "Subway",
-            items: [
-              { id: "sub-chicken-teriyaki", name: "Chicken Teriyaki Sub", meta: "Signature" },
-              { id: "sub-aloo-patty", name: "Aloo Patty Sub", meta: "Veg" },
-              { id: "sub-paneer-tikka", name: "Paneer Tikka Sub", meta: "Veg" },
-              { id: "sub-choc-chip-cookie", name: "Chocolate Chip Cookies", meta: "Dessert" }
-            ]
-          }
+          { name: "McDonald's", items: [
+            { id: "mcd-mcspicy-paneer", name: "McSpicy Paneer", meta: "McDonald's" },
+            { id: "mcd-chicken-maharaja", name: "Chicken Maharaja Mac", meta: "McDonald's" },
+            { id: "mcd-mexican-mcaloo", name: "Mexican McAloo Tikki", meta: "Budget snack" },
+            { id: "mcd-fries-piri", name: "Fries + Piri Piri Mix", meta: "Classic combo" },
+            { id: "mcd-mcflurry-oreo", name: "McFlurry Oreo", meta: "Dessert" }
+          ]},
+          { name: "KFC", items: [
+            { id: "kfc-hot-crispy", name: "Hot & Crispy Chicken", meta: "Signature" },
+            { id: "kfc-zinger-burger", name: "Zinger Burger", meta: "Classic" },
+            { id: "kfc-popcorn-chicken", name: "Popcorn Chicken (Large)", meta: "Snack" },
+            { id: "kfc-rice-bowl", name: "Rice Bowl", meta: "Meal" },
+            { id: "kfc-krusher", name: "Krusher (if available)", meta: "Drink" }
+          ]},
+          { name: "KS Bakers", items: [
+            { id: "ksb-chicken-puff", name: "Chicken Puff", meta: "Bakery" },
+            { id: "ksb-chicken65-burger", name: "Chicken 65 Burger", meta: "Burger" },
+            { id: "ksb-fresh-cream-pastry", name: "Fresh Cream Pastry", meta: "Dessert" },
+            { id: "ksb-dutch-truffle", name: "Dutch Truffle Pastry", meta: "Dessert" },
+            { id: "ksb-chicken-roll", name: "Chicken Roll", meta: "Snack" }
+          ]},
+          { name: "Pizza Hut", items: [
+            { id: "ph-tandoori-paneer", name: "Tandoori Paneer Pizza", meta: "Pizza Hut" },
+            { id: "ph-garlic-bread", name: "Garlic Bread Stix", meta: "Side" },
+            { id: "ph-stuffed-crust", name: "Stuffed Crust Pizza", meta: "Cheese overload" }
+          ]},
+          { name: "Domino's", items: [
+            { id: "dom-chicken-dominator", name: "Chicken Dominator", meta: "Domino's" },
+            { id: "dom-peppy-paneer", name: "Peppy Paneer", meta: "Domino's" },
+            { id: "dom-zingy-parcel", name: "Zingy Parcel", meta: "Snack" },
+            { id: "dom-garlic-bread", name: "Garlic Bread", meta: "Side" },
+            { id: "dom-choco-lava", name: "Choco Lava Cake", meta: "Dessert" }
+          ]},
+          { name: "Chutneys", items: [
+            { id: "ch-mla-pesarattu", name: "MLA Pesarattu", meta: "Chutneys" },
+            { id: "ch-guntur-idli", name: "Guntur Idli", meta: "Spicy" },
+            { id: "ch-rava-dosa", name: "Rava Dosa", meta: "Crispy" },
+            { id: "ch-vada-chutneys", name: "Vada + All Chutneys", meta: "Combo" }
+          ]},
+          { name: "Paradise Biryani", items: [
+            { id: "par-chicken-biryani", name: "Chicken Biryani", meta: "Paradise" },
+            { id: "par-paneer-biryani", name: "Paneer Biryani", meta: "Paradise" },
+            { id: "par-chicken65", name: "Chicken 65", meta: "Starter" },
+            { id: "par-irani-chai", name: "Irani Chai + Osmania", meta: "Tea break" }
+          ]},
+          { name: "Karachi Bakery", items: [
+            { id: "kar-fruit-biscuits", name: "Fruit Biscuits", meta: "Karachi Bakery" },
+            { id: "kar-osmania-biscuits", name: "Osmania Biscuits", meta: "Hyderabad staple" },
+            { id: "kar-plum-cake", name: "Plum Cake", meta: "Bakery" },
+            { id: "kar-choc-cashew", name: "Chocolate Cashew Biscuits", meta: "Snack" }
+          ]},
+          { name: "Starbucks", items: [
+            { id: "sb-java-chip", name: "Java Chip Frappuccino", meta: "Cold, chocolatey" },
+            { id: "sb-caramel-macchiato", name: "Caramel Macchiato", meta: "Hot / Iced" },
+            { id: "sb-cold-brew", name: "Cold Brew", meta: "Strong" },
+            { id: "sb-hot-chocolate", name: "Classic Hot Chocolate", meta: "Comfort" }
+          ]},
+          { name: "Subway", items: [
+            { id: "sub-chicken-teriyaki", name: "Chicken Teriyaki Sub", meta: "Signature" },
+            { id: "sub-aloo-patty", name: "Aloo Patty Sub", meta: "Veg" },
+            { id: "sub-paneer-tikka", name: "Paneer Tikka Sub", meta: "Veg" },
+            { id: "sub-choc-chip-cookie", name: "Chocolate Chip Cookies", meta: "Dessert" }
+          ]}
         ]
       },
-
       oneItem: {
         label: "One-Item Challenge",
         hint: "Just the strongest item from each place. No overthinking.",
@@ -607,7 +317,6 @@
           }
         ]
       },
-
       hydSpecials: {
         label: "Hyderabad Specials",
         hint: "These are pure Hyderabadi soul-food. Try them in legendary spots.",
@@ -617,14 +326,14 @@
             items: [
               { id: "hyd-dum-biryani", name: "Hyderabadi Chicken Dum Biryani", meta: "Bawarchi / Shah Ghouse / Paradise" },
               { id: "hyd-keema-samosa", name: "Keema Samosa", meta: "Old-city bakeries" },
-              { id: "hyd-osmania-irani", name: "Osmania Biscuit + Irani Chai", meta: "Any classic Irani café" },
-              { id: "hyd-marag", name: "Marag (Mutton Soup)", meta: "Wedding / specialty places" },
-              { id: "hyd-pathar-ka-gosht", name: "Pathar Ka Gosht", meta: "Charminar / old city" },
+              { id: "hyd-osmania-irani", name: "Osmania Biscuit + Irani Chai", meta: "Any Irani café" },
+              { id: "hyd-marag", name: "Marag (Mutton Soup)", meta: "Weddings / specials" },
+              { id: "hyd-pathar-ka-gosht", name: "Pathar Ka Gosht", meta: "Charminar side" },
               { id: "hyd-double-ka-meetha", name: "Double Ka Meetha", meta: "Dessert" },
               { id: "hyd-qubani-ka-meetha", name: "Qubani Ka Meetha", meta: "Dessert" },
-              { id: "hyd-chicken65", name: "Chicken 65 (Hyderabad style)", meta: "Andhra / Telangana restaurants" },
+              { id: "hyd-chicken65", name: "Chicken 65 (Hyderabad style)", meta: "Andhra / Telangana places" },
               { id: "hyd-ulavacharu-biryani", name: "Ulavacharu Biryani", meta: "Andhra speciality" },
-              { id: "hyd-pesarattu-upma", name: "Pesarattu + Upma", meta: "Tiffin centres / Chutneys" },
+              { id: "hyd-pesarattu-upma", name: "Pesarattu + Upma", meta: "Tiffin / Chutneys" },
               { id: "hyd-ghee-idli", name: "Ghee Idli (Andhra style)", meta: "Tiffin centres" }
             ]
           }
@@ -633,26 +342,13 @@
     };
 
     const STORAGE_KEY = "food-quest-state-v1";
-
     function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return {};
-        return JSON.parse(raw) || {};
-      } catch {
-        return {};
-      }
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
     }
-
-    function saveState(state) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch {
-        // ignore quota errors
-      }
+    function saveState(s) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {}
     }
-
-    const state = loadState(); // { fullChecklist: {id:true}, oneItem:{}, hydSpecials:{} }
+    const state = loadState();
 
     const listContainer = document.getElementById("listContainer");
     const summaryTitle = document.getElementById("summaryTitle");
@@ -662,6 +358,7 @@
     const tabs = document.querySelectorAll(".tab");
     const resetBtn = document.getElementById("resetBtn");
     const selectAllDone = document.getElementById("selectAllDone");
+    const installBtn = document.getElementById("installBtn");
 
     let activeListKey = "fullChecklist";
 
@@ -673,17 +370,14 @@
     function renderList(listKey) {
       activeListKey = listKey;
       const listDef = DATA[listKey];
-
       summaryTitle.textContent = listDef.label;
       summaryHint.textContent = listDef.hint;
 
       listContainer.innerHTML = "";
-      let total = 0;
-      let done = 0;
+      let total = 0, done = 0;
 
       listDef.groups.forEach(group => {
-        if (!group.items || !group.items.length) return;
-
+        if (!group.items?.length) return;
         const groupLabel = document.createElement("div");
         groupLabel.className = "group-label";
         groupLabel.textContent = group.name;
@@ -735,15 +429,14 @@
           wrapper.appendChild(right);
           listContainer.appendChild(wrapper);
 
-          wrapper.addEventListener("click", (e) => {
-            if (e.target.tagName === "A") return;
+          wrapper.addEventListener("click", () => {
             checkbox.checked = !checkbox.checked;
             updateItem(listKey, item.id, checkbox.checked, wrapper, right);
           });
         });
       });
 
-      if (total === 0) {
+      if (!total) {
         const empty = document.createElement("div");
         empty.className = "empty-note";
         empty.textContent = "No items in this list yet.";
@@ -765,15 +458,13 @@
         rightLabel.textContent = "Not yet";
       }
       saveState(state);
-      // Recalculate counts for active list
       recalcForActiveList();
     }
 
     function recalcForActiveList() {
       const listDef = DATA[activeListKey];
       const listState = getListStateKey(activeListKey);
-      let total = 0;
-      let done = 0;
+      let total = 0, done = 0;
       listDef.groups.forEach(g => {
         g.items.forEach(it => {
           total++;
@@ -787,106 +478,47 @@
       summaryCounts.textContent = `${done} / ${total} done`;
       const percent = total ? (done / total) * 100 : 0;
       progressBar.style.width = `${percent}%`;
-
-      if (!total) {
-        summaryHint.textContent = "Nothing here yet.";
-      } else if (done === 0) {
-        summaryHint.textContent = "First bite unlocks the run. Start with any one.";
-      } else if (done === total) {
-        summaryHint.textContent = "You 100% cleared this tab. Respect.";
-      } else if (percent >= 60) {
-        summaryHint.textContent = "You’re deep in the grind. Finish the last few.";
-      }
+      if (!total) summaryHint.textContent = "Nothing here yet.";
+      else if (done === 0) summaryHint.textContent = "First bite unlocks the run. Start with any one.";
+      else if (done === total) summaryHint.textContent = "You 100% cleared this tab. Respect.";
+      else if (percent >= 60) summaryHint.textContent = "You’re deep in the grind. Finish the last few.";
     }
 
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
         tabs.forEach(t => t.classList.remove("active"));
         tab.classList.add("active");
-        const listKey = tab.dataset.list;
-        renderList(listKey);
+        renderList(tab.dataset.list);
       });
     });
 
     resetBtn.addEventListener("click", () => {
-      const ok = confirm("Reset all your progress in every tab? This cannot be undone.");
-      if (!ok) return;
-      Object.keys(state).forEach(k => { state[k] = {}; });
+      if (!confirm("Reset all your progress in every tab?")) return;
+      Object.keys(state).forEach(k => state[k] = {});
       saveState(state);
       renderList(activeListKey);
     });
 
     selectAllDone.addEventListener("click", () => {
-      const ok = confirm(`Mark ALL items in "${DATA[activeListKey].label}" as done?`);
-      if (!ok) return;
+      if (!confirm(`Mark ALL items in "${DATA[activeListKey].label}" as done?`)) return;
       const listState = getListStateKey(activeListKey);
       const listDef = DATA[activeListKey];
-      listDef.groups.forEach(g => {
-        g.items.forEach(it => {
-          listState[it.id] = true;
-        });
-      });
+      listDef.groups.forEach(g => g.items.forEach(it => listState[it.id] = true));
       saveState(state);
       renderList(activeListKey);
     });
 
-    // Initial render
     renderList("fullChecklist");
 
-    // ---------- PWA: Manifest & Service Worker ----------
-    // Create a manifest dynamically so everything stays in one file
-    (function setupManifest() {
-      const manifest = {
-        name: "Food Quest Checklist",
-        short_name: "FoodQuest",
-        start_url: ".",
-        display: "standalone",
-        background_color: "#020617",
-        theme_color: "#0f172a",
-        description: "Tick off McD, KFC, KS Bakers & Hyderabad specials as you taste them.",
-        icons: [
-          // You can later replace these with real PNG URLs if you host assets
-        ]
-      };
-      const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("link");
-      link.rel = "manifest";
-      link.href = url;
-      document.head.appendChild(link);
-    })();
-
-    // Service worker from a Blob so we keep single-file structure
+    // PWA: Service worker registration
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        const swCode = `
-          const CACHE_NAME = "food-quest-cache-v1";
-          const URLS_TO_CACHE = ["./"];
-
-          self.addEventListener("install", event => {
-            event.waitUntil(
-              caches.open(CACHE_NAME).then(cache => cache.addAll(URLS_TO_CACHE))
-            );
-          });
-
-          self.addEventListener("fetch", event => {
-            event.respondWith(
-              caches.match(event.request).then(response => {
-                return response || fetch(event.request);
-              })
-            );
-          });
-        `;
-        const blob = new Blob([swCode], { type: "text/javascript" });
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl).catch(console.error);
+        navigator.serviceWorker.register("sw.js").catch(console.error);
       });
     }
 
-    // Install button handling
+    // PWA: Install button
     let deferredPrompt = null;
-    const installBtn = document.getElementById("installBtn");
-
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
